@@ -1,0 +1,49 @@
+// ram_tb.v
+`timescale 1ns/1ps
+
+module ram_tb;
+  reg        clk = 0;
+  reg        we;
+  reg [7:0]  addr;
+  reg [7:0]  din;
+  wire [7:0] dout;
+
+  ram uut(
+    .clk(clk),
+    .write_enable(we),
+    .address(addr),
+    .data_in(din),
+    .data_out(dout)
+  );
+
+  // Waveform dump setup
+  initial begin
+    $dumpfile("ram_wave.vcd");
+    $dumpvars(0, ram_tb);
+  end
+
+  // Clock generation: 10ns period
+  always #5 clk = ~clk;
+
+  initial begin
+    // Write data to address 10
+    we = 1; addr = 8'd10; din = 8'hAA;
+    #10;
+
+    // Stop writing, then read back same address
+    we = 0; addr = 8'd10;
+    #10;
+
+    // Write another
+    we = 1; addr = 8'd20; din = 8'h55;
+    #10;
+
+    // Read it
+    we = 0; addr = 8'd20;
+    #10;
+
+    $display("Readback1: addr10 = %h", dout);
+    $display("Readback2: addr20 = %h", dout);
+    $finish;
+  end
+endmodule
